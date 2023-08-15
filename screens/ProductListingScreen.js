@@ -64,6 +64,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 10,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   image: {
     width: 200,
