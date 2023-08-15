@@ -24,6 +24,34 @@ const ProductListingScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
+  const renderContent = () => {
+    let content;
+    if (isLoading) {
+      content = (
+        <ActivityIndicator
+          color={"gray"}
+          size={"large"}
+          style={styles.activityIndicator}
+        />
+      );
+    } else if (errorMessage) {
+      content = (
+        <View style={styles.error}>
+          <Text>{errorMessage}</Text>
+        </View>
+      );
+    } else {
+      content = (
+        <FlatList
+          data={products}
+          renderItem={({ item }) => <ProductCard item={item} />}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      );
+    }
+    return content;
+  };
+
   const getProducts = () => {
     const URL = "https://fakestoreapi.com/products";
     fetch(URL)
@@ -47,35 +75,11 @@ const ProductListingScreen = () => {
     setIsLoading(true);
     getProducts();
   }, []);
-  let content;
-  if (isLoading) {
-    content = (
-      <ActivityIndicator
-        color={"gray"}
-        size={"large"}
-        style={styles.activityIndicator}
-      />
-    );
-  } else if (errorMessage) {
-    content = (
-      <View style={styles.error}>
-        <Text>{errorMessage}</Text>
-      </View>
-    );
-  } else {
-    content = (
-      <FlatList
-        data={products}
-        renderItem={({ item }) => <ProductCard item={item} />}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>ProductListingScreen</Text>
-      {content}
+      {renderContent()}
     </SafeAreaView>
   );
 };
