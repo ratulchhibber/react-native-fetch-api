@@ -22,13 +22,23 @@ const ProductCard = ({ item }) => {
 const ProductListingScreen = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const getProducts = () => {
     const URL = "https://fakestoreapi.com/products";
     fetch(URL)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
+        return res.json();
+      })
       .then((data) => {
         setProducts(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        setErrorMessage(error.message);
         setIsLoading(false);
       });
   };
@@ -37,23 +47,35 @@ const ProductListingScreen = () => {
     setIsLoading(true);
     getProducts();
   }, []);
+  let content;
+  if (isLoading) {
+    content = (
+      <ActivityIndicator
+        color={"gray"}
+        size={"large"}
+        style={styles.activityIndicator}
+      />
+    );
+  } else if (errorMessage) {
+    content = (
+      <View style={styles.error}>
+        <Text>{errorMessage}</Text>
+      </View>
+    );
+  } else {
+    content = (
+      <FlatList
+        data={products}
+        renderItem={({ item }) => <ProductCard item={item} />}
+        keyExtractor={(item) => item.id.toString()}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>ProductListingScreen</Text>
-      {isLoading ? (
-        <ActivityIndicator
-          color={"gray"}
-          size={"large"}
-          style={styles.activityIndicator}
-        />
-      ) : (
-        <FlatList
-          data={products}
-          renderItem={({ item }) => <ProductCard item={item} />}
-          keyExtractor={(item) => item.id.toString()}
-        />
-      )}
+      {content}
     </SafeAreaView>
   );
 };
@@ -70,6 +92,11 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  error: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
