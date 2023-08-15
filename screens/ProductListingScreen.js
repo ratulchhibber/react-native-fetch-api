@@ -6,6 +6,7 @@ import {
   View,
   Image,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 
 const ProductCard = ({ item }) => {
@@ -13,12 +14,14 @@ const ProductCard = ({ item }) => {
     <View style={styles.card}>
       <Image source={{ uri: item.image }} style={styles.image} />
       <Text style={styles.title}>{item.title}</Text>
+      <Text style={styles.title}>${item.price}</Text>
     </View>
   );
 };
 
 const ProductListingScreen = () => {
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getProducts = () => {
     const URL = "https://fakestoreapi.com/products";
@@ -26,21 +29,31 @@ const ProductListingScreen = () => {
       .then((res) => res.json())
       .then((data) => {
         setProducts(data);
+        setIsLoading(false);
       });
   };
 
   useEffect(() => {
+    setIsLoading(true);
     getProducts();
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>ProductListingScreen</Text>
-      <FlatList
-        data={products}
-        renderItem={({ item }) => <ProductCard item={item} />}
-        keyExtractor={(item) => item.id.toString()}
-      />
+      {isLoading ? (
+        <ActivityIndicator
+          color={"gray"}
+          size={"large"}
+          style={styles.activityIndicator}
+        />
+      ) : (
+        <FlatList
+          data={products}
+          renderItem={({ item }) => <ProductCard item={item} />}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -55,6 +68,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 20,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   card: {
     backgroundColor: "white",
