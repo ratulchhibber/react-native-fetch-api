@@ -7,6 +7,8 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
@@ -26,10 +28,13 @@ const ProductListingScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleEndReached = () => {
-    setPage(page + 1);
-    getProducts();
+    if (searchQuery === "") {
+      setPage(page + 1);
+      getProducts();
+    }
   };
 
   const renderContent = () => {
@@ -49,7 +54,8 @@ const ProductListingScreen = () => {
         </View>
       );
     } else {
-      const dataWithLoader = products.concat([{}]);
+      const dataWithLoader =
+        searchQuery === "" ? products.concat([{}]) : products;
       content = (
         <FlatList
           data={dataWithLoader}
@@ -73,7 +79,7 @@ const ProductListingScreen = () => {
   };
 
   const getProducts = () => {
-    const URL = "https://fakestoreapi.com/products?page=${page}";
+    const URL = `https://fakestoreapi.com/products?page=${page}`;
     fetch(URL)
       .then((res) => {
         if (!res.ok) {
@@ -96,9 +102,43 @@ const ProductListingScreen = () => {
     getProducts();
   }, []);
 
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text === "") {
+      // Clear search but keep the current products and pagination
+      getProducts();
+    } else {
+      // Perform local search on the existing products
+      const filteredProducts = products.filter((product) =>
+        product.title.toLowerCase().includes(text.toLowerCase())
+      );
+      setProducts(filteredProducts);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery(() => "");
+    setPage(() => 1);
+    setProducts(() => []);
+    getProducts();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>ProductListingScreen</Text>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search product"
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+        {searchQuery ? (
+          <TouchableOpacity onPress={handleClearSearch}>
+            <Text style={styles.clearButton}>Clear</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
       {renderContent()}
     </SafeAreaView>
   );
@@ -150,6 +190,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
     textAlign: "center",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+  },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  clearButton: {
+    color: "blue",
+    marginLeft: 10,
   },
 });
 
