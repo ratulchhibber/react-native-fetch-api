@@ -8,6 +8,8 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
 
 const ProductCard = ({ item }) => {
   return (
@@ -23,6 +25,12 @@ const ProductListingScreen = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [page, setPage] = useState(1);
+
+  const handleEndReached = () => {
+    setPage(page + 1);
+    getProducts();
+  };
 
   const renderContent = () => {
     let content;
@@ -56,7 +64,8 @@ const ProductListingScreen = () => {
               />
             )
           }
-          keyExtractor={(item) => (item.id ? item.id.toString() : "loader")}
+          keyExtractor={() => uuidv4()}
+          onEndReached={handleEndReached}
         />
       );
     }
@@ -73,7 +82,7 @@ const ProductListingScreen = () => {
         return res.json();
       })
       .then((data) => {
-        setProducts(data);
+        setProducts([...products, ...data]);
         setIsLoading(false);
       })
       .catch((error) => {
