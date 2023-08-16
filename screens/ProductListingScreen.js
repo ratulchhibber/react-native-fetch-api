@@ -41,11 +41,22 @@ const ProductListingScreen = () => {
         </View>
       );
     } else {
+      const dataWithLoader = products.concat([{}]);
       content = (
         <FlatList
-          data={products}
-          renderItem={({ item }) => <ProductCard item={item} />}
-          keyExtractor={(item) => item.id.toString()}
+          data={dataWithLoader}
+          renderItem={({ item }) =>
+            item.id ? (
+              <ProductCard item={item} />
+            ) : (
+              <ActivityIndicator
+                color={"gray"}
+                size={"large"}
+                style={styles.activityIndicator}
+              />
+            )
+          }
+          keyExtractor={(item) => (item.id ? item.id.toString() : "loader")}
         />
       );
     }
@@ -53,7 +64,7 @@ const ProductListingScreen = () => {
   };
 
   const getProducts = () => {
-    const URL = "https://fakestoreapi.com/products";
+    const URL = "https://fakestoreapi.com/products?page=${page}";
     fetch(URL)
       .then((res) => {
         if (!res.ok) {
