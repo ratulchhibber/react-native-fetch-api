@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   SafeAreaView,
   Text,
@@ -13,7 +13,13 @@ import {
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import { useRecoilState } from "recoil";
-import { productsState } from "../atom/ProductState";
+import {
+  productsState,
+  isLoadingState,
+  errorMessageState,
+  pageState,
+  searchQueryState,
+} from "../atom/ProductState";
 
 const ProductCard = ({ item }) => {
   return (
@@ -27,10 +33,10 @@ const ProductCard = ({ item }) => {
 
 const ProductListingScreen = () => {
   const [products, setProducts] = useRecoilState(productsState);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useRecoilState(isLoadingState);
+  const [errorMessage, setErrorMessage] = useRecoilState(errorMessageState);
+  const [page, setPage] = useRecoilState(pageState);
+  const [searchQuery, setSearchQuery] = useRecoilState(searchQueryState);
 
   const handleEndReached = () => {
     if (searchQuery === "") {
@@ -49,7 +55,7 @@ const ProductListingScreen = () => {
           style={styles.activityIndicator}
         />
       );
-    } else if (errorMessage) {
+    } else if (errorMessage !== "") {
       content = (
         <View style={styles.error}>
           <Text>{errorMessage}</Text>
