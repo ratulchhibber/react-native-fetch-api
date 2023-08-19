@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+import { useRecoilState } from "recoil";
+import { productsState } from "../atom/ProductState";
 
 const ProductCard = ({ item }) => {
   return (
@@ -24,7 +26,7 @@ const ProductCard = ({ item }) => {
 };
 
 const ProductListingScreen = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useRecoilState(productsState);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [page, setPage] = useState(1);
